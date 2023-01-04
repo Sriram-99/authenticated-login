@@ -1,16 +1,16 @@
+const md5=require("md5");
 const express = require("express");
 const bodyParser=require("body-parser");
 const ejs=require("ejs");
 const encrypt=require("mongoose-encryption");
 const mongoose=require("mongoose");
+const { env } = require("process");
 mongoose.connect("mongodb://0.0.0.0:27017/userDB",{useNewUrlParser:true}); 
     const userSchema= new mongoose.Schema({
         email:String,
         password:String
     });
-    const chinna="thisisfuntolearn";
-    userSchema.plugin(encrypt,{secret:chinna,
-       encryptedFields:["password"] });
+   
     const User= new mongoose.model("User",userSchema);
 
 const app=express();
@@ -30,7 +30,7 @@ app.get("/register",(req,res)=>{
 app.post("/register",(req,res)=>{
     const newuser=new User({
         email:req.body.username,
-        password:req.body.password
+        password:md5(req.body.password)
     });
     newuser.save((err)=>{
         if(err){
@@ -50,7 +50,7 @@ app.post("/login",(req,res)=>{
                 res.send("user not found");
         }
         else{
-            if(foundlist.password===password){
+            if(foundlist.password===md5(password)){
                 res.render("secrets");
             }
             else{
